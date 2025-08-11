@@ -29,12 +29,12 @@
 TDC_Project/
 ├── CMakeLists.txt        \# frontend\_tdc (C++) 빌드용
 ├── Makefile              \# calibrate\_tdc (C) 빌드 및 실행용
-├── calib\_TDC4CH.c        \# 교정 프로그램 소스
-├── tdc\_settings.cfg      \# DAQ 설정 파일
+├── calib_TDC4CH.c        \# 교정 프로그램 소스
+├── tdc_settings.cfg      \# DAQ 설정 파일
 └── src/
     ├── TdcSystem.h
     ├── TdcSystem.cpp
-    └── frontend\_tdc\_main.cpp
+    └── frontend_tdc_main.cpp
 ```
 
 
