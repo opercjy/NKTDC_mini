@@ -89,6 +89,6 @@ make
 
   * `ip_address`: TDC 장비의 IP 주소를 지정합니다.
   * `acq_time_sec`: 데이터 획득 시간을 초 단위로 지정합니다. (`0` = 무한대)
-  * `threshold1` \~ `threshold4`: 각 채널의 트리거 문턱값을 1\~255 사이의 값으로 설정합니다.
+  * `threshold1` \~ `threshold4`: 각 채널의 트리거 문턱값을 1\~255 사이의 값으로 설정합니다. Constant fraction discriminator 기반
 
 <!-- end list -->
