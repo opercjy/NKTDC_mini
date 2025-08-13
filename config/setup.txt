@@ -1,0 +1,8 @@
+# TDC Device IP Address
+192.168.0.2
+
+# Thresholds (1 ~ 255)
+10   # CH1 
+10   # CH2
+10   # CH3
+10   # CH4
