@@ -1,23 +1,22 @@
-// 이전 답변의 frontend_tdc_mini.cpp 코드와 동일합니다.
-// (TdcController.h를 사용하도록 수정된 버전)
+#include "TdcController.h"
+#include "TFile.h"
+#include "TTree.h"
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 #include <csignal>
 #include <unistd.h>
 #include <fstream>
-#include "TdcController.h" // C++ 클래스 헤더
-#include "TFile.h"
-#include "TTree.h"
-#include "TTimeStamp.h"
+#include <sstream>
 
+// TTree 저장을 위한 데이터 구조
 struct TdcEvent {
-    UInt_t event_id = 0;
-    UInt_t channel = 0;
-    UInt_t tdc = 0;
+    UInt_t    event_id = 0;
+    UInt_t    channel = 0;
+    UInt_t    tdc = 0;
     ULong64_t timestamp = 0;
 
-    bool parse(const char* buffer, UInt_t& global_event_id) {
+    void parse(const char* buffer, UInt_t& global_event_id) {
         event_id = global_event_id;
         tdc = (static_cast<uint8_t>(buffer[1]) << 8) | static_cast<uint8_t>(buffer[0]);
         timestamp = 0;
@@ -26,7 +25,6 @@ struct TdcEvent {
         }
         timestamp *= 8;
         channel = static_cast<uint8_t>(buffer[7]);
-        return true;
     }
 };
 
@@ -34,7 +32,7 @@ volatile sig_atomic_t g_signal_status = 0;
 void signal_handler(int signal) { g_signal_status = signal; }
 
 void print_usage(const char* prog_name) {
-    std::cerr << "Usage: " << prog_name << " -ip <ip> -o <outfile.root> [-t <sec>] [-c <config.txt>]" << std::endl;
+    std::cerr << "Usage: " << prog_name << " -o <outfile.root> -c <config.txt> [-t <sec>] [-ip <ip_override>]" << std::endl;
 }
 
 int main(int argc, char *argv[]) {
@@ -43,32 +41,65 @@ int main(int argc, char *argv[]) {
 
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
-        if (arg == "-ip") ip_addr = argv[++i];
-        else if (arg == "-o") out_filename = argv[++i];
-        else if (arg == "-t") acq_time = std::stoi(argv[++i]);
+        if (arg == "-o") out_filename = argv[++i];
         else if (arg == "-c") config_filename = argv[++i];
+        else if (arg == "-t") acq_time = std::stoi(argv[++i]);
+        else if (arg == "-ip") ip_addr = argv[++i]; // IP override
     }
 
-    if (ip_addr.empty() || out_filename.empty()) {
+    if (out_filename.empty() || config_filename.empty()) {
         print_usage(argv[0]);
         return 1;
     }
 
+    // --- 설정 파일 파싱 ---
+    std::ifstream config_file(config_filename);
+    if (!config_file.is_open()) {
+        std::cerr << "Error: Could not open config file: " << config_filename << std::endl;
+        return 1;
+    }
+
+    std::string line;
+    std::string config_ip;
+    std::vector<int> thresholds;
+    
+    // IP 주소 읽기 (주석 건너뛰기)
+    while(std::getline(config_file, line)) {
+        if (line.empty() || line[0] == '#') continue;
+        config_ip = line;
+        break;
+    }
+
+    // Threshold 읽기 (주석 건너뛰기)
+    while(std::getline(config_file, line) && thresholds.size() < 4) {
+        if (line.empty() || line[0] == '#') continue;
+        std::stringstream ss(line);
+        int thr;
+        if (ss >> thr) {
+            thresholds.push_back(thr);
+        }
+    }
+    
+    // 커맨드 라인으로 IP가 주어지지 않았다면 설정 파일의 IP 사용
+    if (ip_addr.empty()) {
+        ip_addr = config_ip;
+    }
+
+    if (ip_addr.empty() || thresholds.size() < 4) {
+        std::cerr << "Error: Invalid config file format. IP address and 4 thresholds are required." << std::endl;
+        return 1;
+    }
+
+    // --- DAQ 로직 시작 ---
     TdcController tdc;
     try {
         tdc.connect(ip_addr);
         std::cout << "Connected to TDC at " << ip_addr << "." << std::endl;
         tdc.initializeTdc();
 
-        if (!config_filename.empty()) {
-            std::ifstream config(config_filename);
-            int thr;
-            for (int ch = 1; ch <= 4; ++ch) {
-                if (config >> thr) {
-                    tdc.setThreshold(ch, thr);
-                    std::cout << "Set CH" << ch << " threshold to " << tdc.getThreshold(ch) << std::endl;
-                }
-            }
+        for (int ch = 1; ch <= 4; ++ch) {
+            tdc.setThreshold(ch, thresholds[ch-1]);
+            std::cout << "Set CH" << ch << " threshold to " << tdc.getThreshold(ch) << std::endl;
         }
 
         TFile* outfile = TFile::Open(out_filename.c_str(), "RECREATE");
