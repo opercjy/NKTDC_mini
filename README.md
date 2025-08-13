@@ -25,20 +25,20 @@
 
 ```
 
-TDC\_Project/
-├── CMakeLists.txt         \# 메인 빌드 스크립트
-├── README.md              \# 본 문서
+TDC_Project/
+├── CMakeLists.txt         # 메인 빌드 스크립트
+├── README.md              # 본 문서
 │
 ├── config/
-│   └── setup.txt          \# 채널별 Threshold 설정 파일
+│   └── setup.txt          # 채널별 Threshold 설정 파일
 │
-├── lib/                   \# 핵심 라이브러리 소스
+├── lib/                   # 핵심 라이브러리 소스
 │   └── TdcController.cpp/h
 │
-└── app/                   \# 실행 프로그램 소스
-├── frontend\_tdc\_mini.cpp
-├── tdc\_calibrator.cpp
-└── tdc\_viewer.cpp
+└── app/                   # 실행 프로그램 소스
+├── frontend_tdc_mini.cpp
+├── tdc_calibrator.cpp
+└── tdc_viewer.cpp
 
 ```
 
