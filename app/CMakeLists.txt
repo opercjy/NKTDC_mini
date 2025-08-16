@@ -2,18 +2,16 @@
 add_executable(frontend_tdc_mini frontend_tdc_mini.cpp)
 target_link_libraries(frontend_tdc_mini PRIVATE TDC_CONTROLLER ${ROOT_LIBRARIES})
 
-# \--- 캘리브레이션 프로그램 빌드 ---
+# --- 캘리브레이션 프로그램 빌드 ---
 
-add\_executable(tdc\_calibrator tdc\_calibrator.cpp)
-target\_link\_libraries(tdc\_calibrator PRIVATE TDC\_CONTROLLER)
+add_executable(tdc_calibrator tdc_calibrator.cpp)
+target_link_libraries(tdc_calibrator PRIVATE TDC_CONTROLLER)
 
-# \--- 시각화 프로그램 빌드 ---
+# --- 시각화 프로그램 빌드 ---
 
-add\_executable(tdc\_viewer tdc\_viewer.cpp)
-target\_link\_libraries(tdc\_viewer PRIVATE ${ROOT\_LIBRARIES})
+add_executable(tdc_viewer tdc_viewer.cpp)
+target_link_libraries(tdc_viewer PRIVATE ${ROOT_LIBRARIES})
 
 # 생성된 실행 파일 설치
 
-install(TARGETS frontend\_tdc\_mini tdc\_calibrator tdc\_viewer
-RUNTIME DESTINATION bin
-)
+install(TARGETS frontend_tdc_mini tdc_calibrator tdc_viewer RUNTIME DESTINATION bin)
