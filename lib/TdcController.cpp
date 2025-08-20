@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <stdexcept>
 #include <cstring>
+#include <cerrno>
 
 TdcController::TdcController() : m_socket_handle(-1) {}
 
@@ -32,6 +33,7 @@ void TdcController::connect(const std::string& ip_address, int port) {
         throw TdcError("Socket creation failed");
     }
 
+    // Nagle 알고리즘 비활성화 (작은 패킷 전송 지연 방지)
     const int disable_nagle = 1;
     setsockopt(m_socket_handle, IPPROTO_TCP, TCP_NODELAY, &disable_nagle, sizeof(disable_nagle));
 
@@ -39,7 +41,7 @@ void TdcController::connect(const std::string& ip_address, int port) {
         throw TdcError("Connection to TDC failed: " + std::string(strerror(errno)));
     }
     
-    // SPI 비활성화 (기존 코드 참조)
+    // SPI 비활성화 (제조사 프로토콜)
     char cmd_buf[] = { 20 };
     char resp_buf[1];
     transmit(cmd_buf, 1);
@@ -116,10 +118,6 @@ void TdcController::initializeTdc() {
     char response[3];
     transmit(cmd, 1);
     receive(response, 3);
-    printf("TDC Initialized: Aligned=%d, Delay=%d, Bitslip=%d\n", 
-           static_cast<uint8_t>(response[0]), 
-           static_cast<uint8_t>(response[1]), 
-           static_cast<uint8_t>(response[2]));
 }
 
 int TdcController::getDataSize() {
