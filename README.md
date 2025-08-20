@@ -206,7 +206,7 @@ run_daq_long.sh 와 같은 쉘 스크립트를 사용하여 DAQ를 원하는 시
 ACQ_TIME_SEC=86400
 
 # DAQ 프로그램을 무한 실행 모드(-t 0)로 백그라운드에서 시작
-./build/bin/frontend_tdc_mini -c config/setup.txt -o data/run_24h.root -t 0 &
+frontend_tdc_mini -c config/setup.txt -o data/run_24h.root -t 0 &
 
 # DAQ 프로세스의 ID(PID) 저장
 DAQ_PID=$!
